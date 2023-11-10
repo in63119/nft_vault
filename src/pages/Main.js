@@ -46,10 +46,23 @@ export default function Main() {
     }
   };
 
+  const handleMetamask = async () => {
+    const metaMaskAccount = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    setAddress({
+      address: metaMaskAccount[0],
+      privateKey: "wallet",
+    });
+    navigate("/NFT");
+    setIsErr(false);
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", mt: "3%" }}>
       <Box sx={{ display: "flex", justifyContent: "center", mt: "5%" }}>
-        <Typography>PrivateKey or Mnemonic</Typography>
+        <Typography>PrivateKey or Mnemonic or Connect to Wallet</Typography>
       </Box>
       <Box
         sx={{
@@ -115,6 +128,15 @@ export default function Main() {
           variant="contained"
         >
           접속하기
+        </Button>
+      </Box>
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+        <Button
+          sx={{ width: "40%", mt: "3%" }}
+          onClick={handleMetamask}
+          variant="contained"
+        >
+          Connect your MetaMask
         </Button>
       </Box>
     </Box>
