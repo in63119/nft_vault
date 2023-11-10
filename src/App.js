@@ -7,6 +7,7 @@ import { SnackbarProvider } from "notistack";
 import Main from "./pages/Main.js";
 import NFT from "./pages/NFT.js";
 import Mint from "./pages/Mint.js";
+import Market from "./pages/Market.js";
 
 // components
 import TabSelector from "./components/TabSelector.js";
@@ -58,6 +59,7 @@ function App() {
           <Route path="/" element={<Main />} />
           <Route path="/NFT" element={<NFT />} />
           <Route path="/Mint" element={<Mint />} />
+          <Route path="/Market" element={<Market />} />
         </Routes>
         <Snackbar />
       </BrowserRouter>

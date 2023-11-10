@@ -32,6 +32,7 @@ export default function TabSelector() {
       >
         <Tab label="NFT" value="NFT" />
         <Tab label="Mint" value="Mint" />
+        <Tab label="Market" value="Market" />
       </Tabs>
     </Box>
   );
