@@ -10,7 +10,7 @@ import { nftMetaState } from "../recoil/nftMeta.js";
 
 export default function BeforeMint() {
   const fileNum = useRecoilValue(fileNumState);
-  const metaData = useRecoilValue(nftMetaState);
+  // const metaData = useRecoilValue(nftMetaState);
   const nftMeta = useSetRecoilState(nftMetaState);
 
   const handleName = (e) => {
@@ -26,8 +26,6 @@ export default function BeforeMint() {
       description: e.target.value,
     }));
   };
-
-  console.log(metaData);
 
   const rendering = () => {
     const result = [];

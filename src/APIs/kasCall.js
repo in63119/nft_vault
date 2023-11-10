@@ -1,10 +1,8 @@
 import axios from "axios";
-
 import {
   REACT_APP_KAS_ACCESS_KEY,
   REACT_APP_KAS_SECRET_KEY,
 } from "../utils/config.js";
-
 import { hexToNum } from "../utils/caver.js";
 
 axios.defaults.withCredentials = true;
@@ -41,6 +39,9 @@ export const getNftsByAddress = async (address) => {
         nftInfo.transactionHash = nftsByKas[i].lastTransfer.transactionHash;
 
         const metaData = await getMetadata(nftsByKas[i].extras.tokenUri);
+        if (metaData === undefined) {
+          continue;
+        }
         nftInfo.name = metaData.name;
         nftInfo.description = metaData.description;
 

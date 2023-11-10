@@ -158,7 +158,6 @@ export const getBalance = async (address) => {
     floorBalance = Number(balance).toFixed(4);
     return floorBalance;
   }
-  console.log(balance);
   return balance;
 };
 
