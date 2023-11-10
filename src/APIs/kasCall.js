@@ -101,3 +101,58 @@ const getMetadata = async (uri) => {
     console.log(e);
   }
 };
+
+export const getNftsByCaAddress = async (address) => {
+  const result = [];
+  try {
+    const options = {
+      auth: {
+        username: REACT_APP_KAS_ACCESS_KEY,
+        password: REACT_APP_KAS_SECRET_KEY,
+      },
+      headers: {
+        "Content-Type": `application/json`,
+        "x-chain-id": "1001",
+      },
+    };
+    const url = `https://th-api.klaytnapi.com/v2/contract/nft/${address}/token`;
+    const nftsByKas = await axios.get(url, options).then((res) => {
+      return res.data.items;
+    });
+
+    for (let i = 0; i < nftsByKas.length; i++) {
+      const nftInfo = {};
+
+      nftInfo.ownerAddress = nftsByKas[i].owner;
+      nftInfo.tokenId = await hexToNum(nftsByKas[i].tokenId);
+      nftInfo.updatedAt = timeStamp(nftsByKas[i].updatedAt);
+      nftInfo.chain = "Klaytn Baobab";
+      nftInfo.transactionHash = nftsByKas[i].transactionHash;
+
+      const metaData = await getMetadata(nftsByKas[i].tokenUri);
+      if (metaData === undefined || metaData.image === undefined) {
+        continue;
+      }
+      nftInfo.name = metaData.name;
+      nftInfo.description = metaData.description;
+
+      if (metaData.image.slice(0, 4) === "ipfs") {
+        const ipfsHash = metaData.image.slice(7);
+        const checkUri = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+        nftInfo.image = checkUri;
+      } else {
+        nftInfo.image = metaData.image;
+      }
+
+      if (metaData.attributes) {
+        nftInfo.attributes = metaData.attributes;
+      }
+
+      result.push(nftInfo);
+    }
+    return result;
+  } catch (e) {
+    console.log(e);
+    return result;
+  }
+};
