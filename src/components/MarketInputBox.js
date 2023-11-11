@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 // Components
-import MarketNFTs from "../components/MarketNFTs";
+import MarketNFTs from "./MarketNFTs.js";
 
 // MUI css
 import { Box, TextField, InputAdornment } from "@mui/material";
@@ -112,7 +112,11 @@ export default function MarketInputBox() {
         )}
       </Box>
       <Box sx={{ display: "flex", justifyContent: "center", mt: "3%" }}>
-        {isReady ? <MarketNFTs account={inputAddr} /> : null}
+        {isReady ? (
+          <Box>
+            <MarketNFTs account={inputAddr} />
+          </Box>
+        ) : null}
       </Box>
     </Box>
   );

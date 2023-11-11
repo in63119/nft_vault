@@ -16,11 +16,13 @@ import {
 
 export default function MarketNFTs(props) {
   const { nfts } = useRecoilValue(marketNfts);
-  const [isCardExpanded, setIsCardExpanded] = useState(false);
+  const [isCardExpanded, setIsCardExpanded] = useState(nfts.map(() => false));
   const { account } = props;
 
-  const toggleCardExpansion = () => {
-    setIsCardExpanded(!isCardExpanded);
+  const toggleCardExpansion = (index) => {
+    setIsCardExpanded((prevState) =>
+      prevState.map((value, i) => (i === index ? !value : value))
+    );
   };
 
   const handleAddress = (address) => {
@@ -34,193 +36,207 @@ export default function MarketNFTs(props) {
   };
 
   return (
-    <Box>
-      <Typography variant="h5">{nfts[0].name}</Typography>
-
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <Typography>Owned by</Typography>
-        {account.type === "EOA" ? (
-          <Typography
-            variant="h10"
-            color="blue"
-            sx={{ cursor: "pointer", ml: "4px" }}
-            onClick={() => handleAddress(account.address)}
-          >
-            {account.address.slice(0, 6)}...
-            {account.address.slice(
-              account.address.length - 5,
-              account.address.length - 1
-            )}
-          </Typography>
-        ) : (
-          <Typography
-            variant="h10"
-            color="blue"
-            sx={{ cursor: "pointer", ml: "4px" }}
-            onClick={() => handleAddress(nfts[0].ownerAddress)}
-          >
-            {nfts[0].ownerAddress.slice(0, 6)}...
-            {nfts[0].ownerAddress.slice(
-              nfts[0].ownerAddress.length - 5,
-              nfts[0].ownerAddress.length - 1
-            )}
-          </Typography>
-        )}
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          mb: "15px",
-        }}
-      >
-        <img
-          src={nfts[0].image}
-          alt={nfts[0].name}
-          style={{ width: "150px" }}
-        />
-      </Box>
-      <Typography variant="h8" sx={{ mt: "3px" }}>
-        {nfts[0].description}
-      </Typography>
-      {nfts[0].attributes && nfts[0].attributes.length > 0 ? (
+    <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+      {nfts.map((nft, index) => (
         <Box
+          key={index}
           sx={{
-            display: "flex",
-            flexWrap: "wrap",
+            margin: "2%",
+            flex: "0 0 calc(33.33% - 16px)",
           }}
         >
-          {nfts[0].attributes.map((attribute, attrIndex) => (
-            <Box
-              key={attrIndex}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                margin: "10px",
-              }}
-            >
-              <Card
+          <Card sx={{ minWidth: 275 }}>
+            <CardContent>
+              <Typography variant="h5">{nft.name}</Typography>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Typography>Owned by</Typography>
+                {account.type === "EOA" ? (
+                  <Typography
+                    variant="h10"
+                    color="blue"
+                    sx={{ cursor: "pointer", ml: "4px" }}
+                    onClick={() => handleAddress(account.address)}
+                  >
+                    {account.address.slice(0, 6)}...
+                    {account.address.slice(
+                      account.address.length - 5,
+                      account.address.length - 1
+                    )}
+                  </Typography>
+                ) : (
+                  <Typography
+                    variant="h10"
+                    color="blue"
+                    sx={{ cursor: "pointer", ml: "4px" }}
+                    onClick={() => handleAddress(nfts.ownerAddress)}
+                  >
+                    {nft.ownerAddress.slice(0, 6)}...
+                    {nft.ownerAddress.slice(
+                      nft.ownerAddress.length - 5,
+                      nft.ownerAddress.length - 1
+                    )}
+                  </Typography>
+                )}
+              </Box>
+              <Box
                 sx={{
-                  minWidth: 60,
-                  backgroundColor: "#F1F1F1",
+                  display: "flex",
+                  justifyContent: "center",
+                  mb: "15px",
                 }}
               >
-                <CardContent>
+                <img
+                  src={nft.image}
+                  alt={nft.name}
+                  style={{ width: "150px" }}
+                />
+              </Box>
+              <Typography variant="h8" sx={{ mt: "3px" }}>
+                {nft.description}
+              </Typography>
+              {nft.attributes && nft.attributes.length > 0 ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {nft.attributes.map((attribute, attrIndex) => (
+                    <Box
+                      key={attrIndex}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        margin: "10px",
+                      }}
+                    >
+                      <Card
+                        sx={{
+                          minWidth: 60,
+                          backgroundColor: "#F1F1F1",
+                        }}
+                      >
+                        <CardContent>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Typography variant="h10" fontSize="small">
+                              {attribute.trait_type}
+                            </Typography>
+                            <Typography
+                              variant="h10"
+                              fontSize="small"
+                              sx={{ mt: "3px" }}
+                            >
+                              {attribute.value}
+                            </Typography>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    </Box>
+                  ))}
+                </Box>
+              ) : null}
+              <Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isCardExpanded[index]}
+                      onChange={() => toggleCardExpansion(index)}
+                      color="primary"
+                    />
+                  }
+                  label="Details"
+                />
+                {isCardExpanded[index] && (
                   <Box
                     sx={{
                       display: "flex",
                       flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
+                      flexWrap: "wrap",
+                      p: 2,
                     }}
                   >
-                    <Typography variant="h10" fontSize="small">
-                      {attribute.trait_type}
-                    </Typography>
-                    <Typography
-                      variant="h10"
-                      fontSize="small"
-                      sx={{ mt: "3px" }}
-                    >
-                      {attribute.value}
-                    </Typography>
+                    <Box sx={{ display: "flex" }}>
+                      <Typography fontSize="small">
+                        Contract Address :
+                      </Typography>
+                      {account.type === "EOA" ? (
+                        <Typography
+                          variant="h10"
+                          color="blue"
+                          fontSize="small"
+                          sx={{ cursor: "pointer", ml: "4px" }}
+                          onClick={() => handleAddress(nft.contractAddress)}
+                        >
+                          {nft.contractAddress.slice(0, 6)}...
+                          {nft.contractAddress.slice(
+                            nft.contractAddress.length - 5,
+                            nft.contractAddress.length - 1
+                          )}
+                        </Typography>
+                      ) : (
+                        <Typography
+                          variant="h10"
+                          color="blue"
+                          fontSize="small"
+                          sx={{ cursor: "pointer", ml: "4px" }}
+                          onClick={() => handleAddress(account.address)}
+                        >
+                          {account.address.slice(0, 6)}...
+                          {account.address.slice(
+                            account.address.length - 5,
+                            account.address.length - 1
+                          )}
+                        </Typography>
+                      )}
+                    </Box>
+                    <Box sx={{ mt: "10px", display: "flex" }}>
+                      <Typography fontSize="small">Token ID : </Typography>
+                      <Typography fontSize="small" sx={{ ml: "4px" }}>
+                        {nft.tokenId}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ mt: "10px", display: "flex" }}>
+                      <Typography fontSize="small">Chain : </Typography>
+                      <Typography fontSize="small" sx={{ ml: "4px" }}>
+                        {nft.chain}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ mt: "10px", display: "flex" }}>
+                      <Typography fontSize="small">Last Updated : </Typography>
+                      <Typography fontSize="small" sx={{ ml: "4px" }}>
+                        {nft.createdAt}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ mt: "10px", display: "flex" }}>
+                      <Typography fontSize="small">Transaction : </Typography>
+                      <Typography
+                        variant="h10"
+                        color="blue"
+                        fontSize="small"
+                        sx={{ cursor: "pointer", ml: "4px" }}
+                        onClick={() => handleTx(nft.transactionHash)}
+                      >
+                        {nft.transactionHash.slice(0, 6)}...
+                        {nft.transactionHash.slice(
+                          nft.transactionHash.length - 5,
+                          nft.transactionHash.length - 1
+                        )}
+                      </Typography>
+                    </Box>
                   </Box>
-                </CardContent>
-              </Card>
-            </Box>
-          ))}
-        </Box>
-      ) : null}
-      <Box>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={isCardExpanded}
-              onChange={toggleCardExpansion}
-              color="primary"
-            />
-          }
-          label="Details"
-        />
-        {isCardExpanded && (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              flexWrap: "wrap",
-              p: 2,
-            }}
-          >
-            <Box sx={{ display: "flex" }}>
-              <Typography fontSize="small">Contract Address :</Typography>
-              {account.type === "EOA" ? (
-                <Typography
-                  variant="h10"
-                  color="blue"
-                  fontSize="small"
-                  sx={{ cursor: "pointer", ml: "4px" }}
-                  onClick={() => handleAddress(nfts[0].contractAddress)}
-                >
-                  {nfts[0].contractAddress.slice(0, 6)}...
-                  {nfts[0].contractAddress.slice(
-                    nfts[0].contractAddress.length - 5,
-                    nfts[0].contractAddress.length - 1
-                  )}
-                </Typography>
-              ) : (
-                <Typography
-                  variant="h10"
-                  color="blue"
-                  fontSize="small"
-                  sx={{ cursor: "pointer", ml: "4px" }}
-                  onClick={() => handleAddress(account.address)}
-                >
-                  {account.address.slice(0, 6)}...
-                  {account.address.slice(
-                    account.address.length - 5,
-                    account.address.length - 1
-                  )}
-                </Typography>
-              )}
-            </Box>
-            <Box sx={{ mt: "10px", display: "flex" }}>
-              <Typography fontSize="small">Token ID : </Typography>
-              <Typography fontSize="small" sx={{ ml: "4px" }}>
-                {nfts[0].tokenId}
-              </Typography>
-            </Box>
-            <Box sx={{ mt: "10px", display: "flex" }}>
-              <Typography fontSize="small">Chain : </Typography>
-              <Typography fontSize="small" sx={{ ml: "4px" }}>
-                {nfts[0].chain}
-              </Typography>
-            </Box>
-            <Box sx={{ mt: "10px", display: "flex" }}>
-              <Typography fontSize="small">Last Updated : </Typography>
-              <Typography fontSize="small" sx={{ ml: "4px" }}>
-                {nfts[0].createdAt}
-              </Typography>
-            </Box>
-            <Box sx={{ mt: "10px", display: "flex" }}>
-              <Typography fontSize="small">Transaction : </Typography>
-              <Typography
-                variant="h10"
-                color="blue"
-                fontSize="small"
-                sx={{ cursor: "pointer", ml: "4px" }}
-                onClick={() => handleTx(nfts[0].transactionHash)}
-              >
-                {nfts[0].transactionHash.slice(0, 6)}...
-                {nfts[0].transactionHash.slice(
-                  nfts[0].transactionHash.length - 5,
-                  nfts[0].transactionHash.length - 1
                 )}
-              </Typography>
-            </Box>
-          </Box>
-        )}
-      </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      ))}
     </Box>
   );
 }
