@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // MUI css
+// eslint-disable-next-line
 import { Box, TextField, Typography, Button } from "@mui/material";
 
 // recoil
@@ -14,12 +15,16 @@ import { MnemocinToAccount, privateKeyToAccount } from "../utils/caver.js";
 
 export default function Main() {
   const setLoading = useSetRecoilState(loadingState);
+  // eslint-disable-next-line
   const [isErr, setIsErr] = useState(false);
   const setAddress = useSetRecoilState(addressState);
+  // eslint-disable-next-line
   const [inputKey, setInputKey] = useState("");
+  // eslint-disable-next-line
   const [inputCode, setInputCode] = useState("");
   const navigate = useNavigate();
 
+  // eslint-disable-next-line
   const handleGetAddress = async () => {
     setLoading({ isLoading: true });
     const addressByKey = await privateKeyToAccount(inputKey);
@@ -62,9 +67,9 @@ export default function Main() {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", mt: "3%" }}>
       <Box sx={{ display: "flex", justifyContent: "center", mt: "5%" }}>
-        <Typography>PrivateKey or Mnemonic or Connect to Wallet</Typography>
+        <Typography>Connect to Wallet</Typography>
       </Box>
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           flexDirection: "row",
@@ -129,7 +134,7 @@ export default function Main() {
         >
           접속하기
         </Button>
-      </Box>
+      </Box> */}
       <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
         <Button
           sx={{ width: "40%", mt: "3%" }}

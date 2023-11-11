@@ -123,6 +123,7 @@ export const getNftsByCaAddress = async (address) => {
     for (let i = 0; i < nftsByKas.length; i++) {
       const nftInfo = {};
 
+      nftInfo.contractAddress = address;
       nftInfo.ownerAddress = nftsByKas[i].owner;
       nftInfo.tokenId = await hexToNum(nftsByKas[i].tokenId);
       nftInfo.updatedAt = timeStamp(nftsByKas[i].updatedAt);

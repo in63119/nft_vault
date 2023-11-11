@@ -1,8 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+// Component
+import MarketModal from "./MarketModal.js";
+import MarketErrModal from "./MarketErrModal.js";
+import MarketBuyModal from "./MarketBuyModal.js";
 
 // Recoil
-import { useRecoilValue } from "recoil";
+import { useRecoilValue, useRecoilState, useSetRecoilState } from "recoil";
 import { marketNfts } from "../recoil/marketNfts";
+import { addressState } from "../recoil/account";
+import { loadingState } from "../recoil/loading.js";
 
 // MUI css
 import {
@@ -13,11 +20,25 @@ import {
   FormControlLabel,
   Switch,
 } from "@mui/material";
+import SellIOutlinedconIcon from "@mui/icons-material/SellOutlined";
+import SellIcon from "@mui/icons-material/Sell";
+import PaidIcon from "@mui/icons-material/Paid";
+
+// Util
+import { checkSellItem } from "../utils/web3";
 
 export default function MarketNFTs(props) {
-  const { nfts } = useRecoilValue(marketNfts);
-  const [isCardExpanded, setIsCardExpanded] = useState(nfts.map(() => false));
+  const [nfts, setNfts] = useRecoilState(marketNfts);
+  const [isCardExpanded, setIsCardExpanded] = useState(
+    nfts.nfts.map(() => false)
+  );
   const { account } = props;
+  const isLoading = useSetRecoilState(loadingState);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [buyModalOpen, setBuyModalOpen] = useState(false);
+  const [selectedNFT, setSelectedNFT] = useState(null);
+  const [permission, setPermission] = useState(true);
+  const { address } = useRecoilValue(addressState);
 
   const toggleCardExpansion = (index) => {
     setIsCardExpanded((prevState) =>
@@ -35,9 +56,96 @@ export default function MarketNFTs(props) {
     window.open(`https://baobab.klaytnscope.com/tx/${tx}?tabId=nftTransfer`);
   };
 
+  const handleOpenModal = (nft) => {
+    switch (account.type) {
+      case "EOA":
+        if (
+          account.address &&
+          account.address.toLowerCase() === address.toLowerCase()
+        ) {
+          setSelectedNFT(nft);
+          setModalOpen(true);
+        } else {
+          setPermission(false);
+          setModalOpen(true);
+        }
+        break;
+      case "CA":
+        if (
+          nft.ownerAddress &&
+          nft.ownerAddress.toLowerCase() === address.toLowerCase()
+        ) {
+          setSelectedNFT(nft);
+          setModalOpen(true);
+        } else {
+          setPermission(false);
+          setModalOpen(true);
+        }
+        break;
+      default:
+        setPermission(false);
+        setModalOpen(true);
+    }
+  };
+
+  const handleOpenBuyModal = (nft) => {
+    setSelectedNFT(nft);
+    setBuyModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setBuyModalOpen(false);
+    setPermission(true);
+  };
+
+  useEffect(() => {
+    const check = async () => {
+      isLoading({ isLoading: true });
+
+      let updateRequired = false;
+      let sellNFTs = [];
+
+      if (account.type === "EOA") {
+        sellNFTs = await checkSellItem(account, null);
+        updateRequired = sellNFTs.length > 0;
+      } else if (account.type === "CA") {
+        sellNFTs = await checkSellItem(account, nfts.nfts);
+        updateRequired = sellNFTs.length > 0;
+      }
+
+      if (updateRequired) {
+        const updatedNfts = nfts.nfts.map((nft) => {
+          const matchingSellNftIndex = sellNFTs.findIndex(
+            (sellNft) =>
+              sellNft.tokenId === String(nft.tokenId) &&
+              sellNft.tokenAddress.toLowerCase() ===
+                nft.contractAddress.toLowerCase() &&
+              sellNft.listed === true
+          );
+          const isSellList = matchingSellNftIndex !== -1;
+          return isSellList
+            ? {
+                ...nft,
+                isSellList,
+                price: sellNFTs[matchingSellNftIndex].price,
+                sellNftIndex: matchingSellNftIndex,
+              }
+            : { ...nft, isSellList };
+        });
+        setNfts({ nfts: updatedNfts });
+      }
+
+      isLoading({ isLoading: false });
+    };
+
+    check();
+    // eslint-disable-next-line
+  }, [account, isLoading]);
+
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-      {nfts.map((nft, index) => (
+      {nfts.nfts?.map((nft, index) => (
         <Box
           key={index}
           sx={{
@@ -45,7 +153,42 @@ export default function MarketNFTs(props) {
             flex: "0 0 calc(33.33% - 16px)",
           }}
         >
-          <Card sx={{ minWidth: 275 }}>
+          <Card sx={{ minWidth: 275, position: "relative" }}>
+            {nft.isSellList ? (
+              <>
+                <PaidIcon
+                  onClick={() => handleOpenBuyModal(nft)}
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 40,
+                    cursor: "pointer",
+                  }}
+                />
+                <SellIcon
+                  onClick={() => handleOpenModal(nft)}
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    cursor: "pointer",
+                  }}
+                  color="secondary"
+                />
+              </>
+            ) : (
+              <SellIOutlinedconIcon
+                onClick={() => handleOpenModal(nft)}
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  cursor: "pointer",
+                }}
+                color="secondary"
+              />
+            )}
+
             <CardContent>
               <Typography variant="h5">{nft.name}</Typography>
               <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -57,24 +200,26 @@ export default function MarketNFTs(props) {
                     sx={{ cursor: "pointer", ml: "4px" }}
                     onClick={() => handleAddress(account.address)}
                   >
-                    {account.address.slice(0, 6)}...
-                    {account.address.slice(
-                      account.address.length - 5,
-                      account.address.length - 1
-                    )}
+                    {account.address?.slice(0, 6)}...
+                    {account.address &&
+                      account.address.slice(
+                        account.address.length - 5,
+                        account.address.length - 1
+                      )}
                   </Typography>
                 ) : (
                   <Typography
                     variant="h10"
                     color="blue"
                     sx={{ cursor: "pointer", ml: "4px" }}
-                    onClick={() => handleAddress(nfts.ownerAddress)}
+                    onClick={() => handleAddress(nft.ownerAddress)}
                   >
-                    {nft.ownerAddress.slice(0, 6)}...
-                    {nft.ownerAddress.slice(
-                      nft.ownerAddress.length - 5,
-                      nft.ownerAddress.length - 1
-                    )}
+                    {nft.ownerAddress?.slice(0, 6)}...
+                    {nft.ownerAddress &&
+                      nft.ownerAddress.slice(
+                        nft.ownerAddress.length - 5,
+                        nft.ownerAddress.length - 1
+                      )}
                   </Typography>
                 )}
               </Box>
@@ -237,6 +382,20 @@ export default function MarketNFTs(props) {
           </Card>
         </Box>
       ))}
+      {permission ? (
+        <MarketModal
+          open={modalOpen}
+          handleClose={handleCloseModal}
+          nft={selectedNFT}
+        />
+      ) : (
+        <MarketErrModal open={modalOpen} handleClose={handleCloseModal} />
+      )}
+      <MarketBuyModal
+        open={buyModalOpen}
+        handleClose={handleCloseModal}
+        nft={selectedNFT}
+      />
     </Box>
   );
 }

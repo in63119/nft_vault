@@ -3,7 +3,6 @@ import {
   REACT_APP_RPC_URL,
   REACT_APP_PRIVATE_KEY,
 } from "./config.js";
-import CryptoJS from "crypto-js";
 import { ethers } from "ethers";
 
 // abi
@@ -84,11 +83,6 @@ export const minting = async (tokenURI, to) => {
 
 // Transaction for Data
 export const SendTransactionNoValue = async (data, to, estimateGas) => {
-  const privateKey = CryptoJS.AES.decrypt(
-    REACT_APP_PRIVATE_KEY,
-    REACT_APP_ADDRESS
-  ).toString(CryptoJS.enc.Utf8);
-
   const signTx = await caver.klay.accounts
     .signTransaction(
       {
@@ -98,7 +92,7 @@ export const SendTransactionNoValue = async (data, to, estimateGas) => {
         gasPrice: await caver.klay.getGasPrice(),
         data: data,
       },
-      privateKey
+      REACT_APP_PRIVATE_KEY
     )
     .then((res) => res.rawTransaction);
 

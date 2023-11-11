@@ -1,5 +1,39 @@
 {
   "abi": [
+    { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "owner", "type": "address" }
+      ],
+      "name": "OwnableInvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "account", "type": "address" }
+      ],
+      "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
     {
       "inputs": [
         { "internalType": "address", "name": "", "type": "address" },
@@ -9,6 +43,20 @@
       ],
       "name": "onERC721Received",
       "outputs": [{ "internalType": "bytes4", "name": "", "type": "bytes4" }],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -31,6 +79,16 @@
       "stateMutability": "view",
       "type": "function"
     },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "newOwner", "type": "address" }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    { "stateMutability": "payable", "type": "receive" },
     {
       "inputs": [
         {
@@ -73,13 +131,21 @@
     },
     {
       "inputs": [
-        { "internalType": "uint256", "name": "_index", "type": "uint256" }
+        { "internalType": "uint256", "name": "_index", "type": "uint256" },
+        { "internalType": "address", "name": "_owner", "type": "address" }
       ],
       "name": "removeNFTFromMarket",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     }
   ],
-  "address": "0xF6cBDc5B0300C40D6a4E5F8AB0176DC60b209633"
+  "address": "0xCfae7443524b7C693CE3C6c8e8C485E2b08573b7"
 }

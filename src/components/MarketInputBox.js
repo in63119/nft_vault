@@ -30,30 +30,35 @@ export default function MarketInputBox() {
 
   const handleClick = async () => {
     isLoading({ isLoading: true });
-    const check = await checkAddress(inputAddr.address);
-    setCheckAddr(check.result);
-
-    if (check.result && check.type === "EOA") {
-      const eoaNFTs = await getNftsByAddress(inputAddr.address);
-      setInputAddr({
-        address: inputAddr.address,
-        type: check.type,
-      });
-      setMarketNfts({ nfts: eoaNFTs });
-      setIsReady(true);
-      isLoading({ isLoading: false });
-    } else if (check.result && check.type === "CA") {
-      const caNFTs = await getNftsByCaAddress(inputAddr.address);
-      setMarketNfts({ nfts: caNFTs });
-      setInputAddr({
-        address: inputAddr.address,
-        type: check.type,
-      });
-      setIsReady(true);
-      isLoading({ isLoading: false });
-    } else {
+    if (inputAddr.address.length === 0) {
       setIsReady(false);
       isLoading({ isLoading: false });
+    } else {
+      const check = await checkAddress(inputAddr.address);
+      setCheckAddr(check.result);
+
+      if (check.result && check.type === "EOA") {
+        const eoaNFTs = await getNftsByAddress(inputAddr.address);
+        setInputAddr({
+          address: inputAddr.address,
+          type: check.type,
+        });
+        setMarketNfts({ nfts: eoaNFTs });
+        setIsReady(true);
+        isLoading({ isLoading: false });
+      } else if (check.result && check.type === "CA") {
+        const caNFTs = await getNftsByCaAddress(inputAddr.address);
+        setMarketNfts({ nfts: caNFTs });
+        setInputAddr({
+          address: inputAddr.address,
+          type: check.type,
+        });
+        setIsReady(true);
+        isLoading({ isLoading: false });
+      } else {
+        setIsReady(false);
+        isLoading({ isLoading: false });
+      }
     }
   };
 
