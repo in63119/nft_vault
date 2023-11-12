@@ -37,6 +37,7 @@ export const getNftsByAddress = async (address) => {
         nftInfo.createdAt = timeStamp(nftsByKas[i].updatedAt);
         nftInfo.chain = "Klaytn Baobab";
         nftInfo.transactionHash = nftsByKas[i].lastTransfer.transactionHash;
+        nftInfo.ownerAddress = address;
 
         const metaData = await getMetadata(nftsByKas[i].extras.tokenUri);
         if (metaData === undefined) {

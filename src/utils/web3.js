@@ -59,8 +59,9 @@ export const sellItem = async (nft, account, price) => {
         const metaWeb3 = new Web3(window.ethereum);
 
         try {
-          await window.ethereum.enable();
-          const accounts = await metaWeb3.eth.getAccounts();
+          const accounts = await window.ethereum.request({
+            method: "eth_requestAccounts",
+          });
 
           const contract = new metaWeb3.eth.Contract(MarketABI, MarketCA)
             .methods;
@@ -115,13 +116,14 @@ export const buyItem = async (nft, account, price) => {
         const metaWeb3 = new Web3(window.ethereum);
 
         try {
-          await window.ethereum.enable(); // MetaMask 계정 연결
-          const accounts = await metaWeb3.eth.getAccounts(); // 계정 주소 가져오기
+          const accounts = await window.ethereum.request({
+            method: "eth_requestAccounts",
+          });
 
           const contract = new metaWeb3.eth.Contract(MarketABI, MarketCA)
             .methods;
 
-          const gasEstimate = await marketContract
+          const gasEstimate = await contract
             .removeNFTFromMarket(nft.sellNftIndex, nft.ownerAddress)
             .estimateGas({
               from: accounts[0],
@@ -132,9 +134,9 @@ export const buyItem = async (nft, account, price) => {
             .removeNFTFromMarket(nft.sellNftIndex, nft.ownerAddress)
             .send({
               from: accounts[0],
-              value: await web3.utils.toWei(price, "ether"),
+              value: await metaWeb3.utils.toWei(price, "ether"),
               gas: gasEstimate,
-              gasPrice: await web3.eth.getGasPrice(),
+              gasPrice: await metaWeb3.eth.getGasPrice(),
             })
             .then((result) => {
               console.log("NFT removed from market", result);
