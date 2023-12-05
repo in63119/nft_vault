@@ -24,7 +24,7 @@ import { guideState } from "../recoil/guide.js";
 import { successState } from "../recoil/success.js";
 
 // Util
-import { isListening, getBalance } from "../utils/caver";
+import { getBalance, isListening } from "../utils/web3.js";
 
 export default function Header() {
   // state reset

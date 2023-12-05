@@ -17,7 +17,8 @@ import { successState } from "../recoil/success.js";
 import { fileNumState } from "../recoil/files.js";
 
 // caver
-import { minting, sendSignTx } from "../utils/caver.js";
+import { sendSignTx } from "../utils/caver.js";
+import { minting } from "../utils/web3.js";
 
 export default function MintButton() {
   const nftMetaData = useRecoilValue(nftMetaState);

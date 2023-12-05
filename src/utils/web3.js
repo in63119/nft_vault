@@ -6,10 +6,19 @@ import {
 } from "./config.js";
 
 // Contract
-import { MarketCA, MarketABI, AttendABI } from "../contract/getAbiData.js";
+import {
+  MarketCA,
+  MarketABI,
+  AttendABI,
+  AttendCA,
+} from "../contract/getAbiData.js";
 
-const web3 = new Web3(REACT_APP_RPC_URL);
+const web3 = new Web3(window.ethereum);
 const marketContract = new web3.eth.Contract(MarketABI, MarketCA).methods;
+const nftContract = new web3.eth.Contract(AttendABI, AttendCA).methods;
+const accounts = window.ethereum.request({
+  method: "eth_requestAccounts",
+});
 
 export const checkAddress = async (address) => {
   const result = {
@@ -102,7 +111,6 @@ export const sellItem = async (nft, account, price) => {
         console.log("MetaMask is not installed");
         break;
       }
-    // privateKey있을 때는 이것으로 해야하는데...
     default:
       break;
   }
@@ -232,5 +240,66 @@ const SendTransactionNoValue = async (data, to, estimateGas) => {
         });
     });
 
+  return result;
+};
+
+// 잔액 조회
+export const getBalance = async (address) => {
+  const balance = await web3.eth.getBalance(address).then(async (data) => {
+    return web3.utils.fromWei(data, "ether");
+  });
+  let floorBalance;
+  let decimal;
+  let sliceIndex = 0;
+  const arrayBalance = balance.split("");
+
+  for (let i = 0; i < arrayBalance.length; i++) {
+    if (arrayBalance[i] === ".") {
+      sliceIndex = i;
+      break;
+    }
+  }
+
+  decimal = balance.slice(sliceIndex + 1);
+
+  if (decimal.length > 4) {
+    floorBalance = Number(balance).toFixed(4);
+    return floorBalance;
+  }
+
+  return balance;
+};
+
+// 네트워크 상태
+export const isListening = async () => {
+  const peerCount = await web3.eth.net.getPeerCount();
+  return peerCount;
+};
+
+// NFT Minting
+export const minting = async (tokenURI, to) => {
+  const mint = nftContract.methods.mintNFT(to, tokenURI).encodeABI();
+
+  const estimate = await nftContract.methods.mintNFT(to, tokenURI).estimateGas({
+    from: accounts[0],
+  });
+
+  console.log("예상 실행 가스비 견적 : ", estimate);
+  // const result = await SendTransactionNoValue(mint, AttendCA, estimate);
+  const result = await nftContract
+    .mintNFT(to, tokenURI)
+    .send({
+      from: accounts[0],
+      gas: estimate,
+      gasPrice: await web3.eth.getGasPrice(),
+    })
+    .then((result) => {
+      console.log("완료되었습니다.", result);
+    })
+    .catch((error) => {
+      console.error("Error : ", error);
+      throw error;
+    });
+  console.log("트랜잭션 해시 : ", result);
   return result;
 };
